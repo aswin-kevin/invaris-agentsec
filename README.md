@@ -8,6 +8,12 @@
 
 Real output, not a mock-up: against the bundled vulnerable demo agent, 0 of 35 scenarios pass and AgentSec reports 43 findings. The hardened `--safe` variant of the same agent passes all 35. Reproduce it with the commands under [Try It](#try-it).
 
+### Try it in your browser
+
+No install, no agent, no API key: attack a small agent in a notebook and see it break, then fix it.
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/invarislabs/invaris-agentsec/blob/main/examples/notebooks/agentsec_quickstart.ipynb)
+
 ### Quick start
 
 ```bash
