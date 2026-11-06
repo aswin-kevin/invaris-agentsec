@@ -14,6 +14,10 @@ No install, no agent, no API key: attack a small agent in a notebook and see it 
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/invarislabs/invaris-agentsec/blob/main/examples/notebooks/agentsec_quickstart.ipynb)
 
+**Part 2, a real LLM agent:** the same attacks against a real model (OpenAI or any OpenAI-compatible provider such as Groq), then a guard in code that stops them. Needs an API key.
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/invarislabs/invaris-agentsec/blob/main/examples/notebooks/agentsec_real_llm.ipynb)
+
 ### Quick start
 
 ```bash
