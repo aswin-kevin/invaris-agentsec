@@ -10,7 +10,9 @@ Real output, not a mock-up: against the bundled vulnerable demo agent, 0 of 35 s
 
 ### Try it in your browser
 
-No install, no agent, no API key: attack a small agent in a notebook and see it break, then fix it.
+**[Open the AgentSec Playground](https://invarislabs.github.io/invaris-agentsec/)**: the real package runs in your browser (Pyodide, nothing to install). Click "Run attack" to watch a sample agent rack up 8 critical findings, flip it to hardened to see 0, or bring your own key (OpenAI, Groq, OpenRouter, Anthropic or any OpenAI-compatible URL) to attack a real model. Your key stays in the tab and goes only to the provider. Source: [`playground/`](playground/).
+
+Prefer a notebook? Attack a small agent in Colab and see it break, then fix it. No install, no agent, no API key:
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/invarislabs/invaris-agentsec/blob/main/examples/notebooks/agentsec_quickstart.ipynb)
 

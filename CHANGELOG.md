@@ -3,6 +3,15 @@
 All notable changes are listed here. The project follows [Semantic Versioning](https://semver.org/); while the
 version is below 1.0, minor releases may change behaviour, and the changes are listed below.
 
+## Unreleased
+
+- New: browser playground (`playground/`, deployed to GitHub Pages by `.github/workflows/playground.yml`). The
+  real package runs in Pyodide inside a Web Worker. Sample mode runs the quickstart notebook's agent (naive: 8
+  critical findings, hardened: 0). Bring-your-own-key mode runs five categories against OpenAI, Groq, OpenRouter,
+  Anthropic or any OpenAI-compatible URL, with clear errors for a bad key, CORS blocks and rate limits. The key
+  stays in memory and goes only to the provider. Results: per-finding cards, copy as Markdown, JSON download and a
+  share line. No engine changes.
+
 ## 0.9.0
 
 - New: `agentsec dashboard`, a local, read-only web dashboard over the report files AgentSec already writes
