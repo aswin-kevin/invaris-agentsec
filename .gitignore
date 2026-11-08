@@ -6,3 +6,7 @@ build/
 dist/
 .venv/
 /invaris_agentsec-*/
+
+# Playground build output and optional self-hosted Pyodide
+playground/vendor/
+playground/pyodide/
