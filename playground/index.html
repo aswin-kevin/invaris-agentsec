@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- No inline or third-party scripts on the page. The script-src/connect-src extras are only for the
+       worker (Pyodide from jsDelivr needs wasm and eval; the provider calls are HTTPS or a local model),
+       in case a browser applies the page's policy to workers too. -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'wasm-unsafe-eval' 'unsafe-eval'; style-src 'self'; img-src 'self' data:; connect-src 'self' https: http://localhost:* http://127.0.0.1:*; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>AgentSec Playground: attack an AI agent in your browser</title>
+  <meta name="description" content="Run Invaris AgentSec attacks on an AI agent right in your browser. No install, no account. Open source.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 4 7v8c0 7.5 5.1 13.4 12 15 6.9-1.6 12-7.5 12-15V7z' fill='%234f46e5'/%3E%3Cpath d='m11 16 3.5 3.5L21.5 12' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="top">
+    <div class="wrap top-row">
+      <a class="brand" href="https://github.com/invarislabs/invaris-agentsec" rel="noopener">
+        <svg viewBox="0 0 32 32" aria-hidden="true" class="logo"><path d="M16 2 4 7v8c0 7.5 5.1 13.4 12 15 6.9-1.6 12-7.5 12-15V7z"/><path d="m11 16 3.5 3.5L21.5 12" class="tick"/></svg>
+        <span>AgentSec <em>Playground</em></span>
+      </a>
+      <div class="top-actions">
+        <span id="runtime" class="pill" role="status" aria-live="polite"><span class="spinner" aria-hidden="true"></span><span id="runtime-text">Loading Python…</span></span>
+        <button id="theme" class="icon-btn" type="button" aria-label="Theme: auto" title="Theme: auto">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    <section class="hero">
+      <h1>Attack an AI agent in your browser.</h1>
+      <p class="lede">The real <code>invaris-agentsec</code> engine runs here with Python in WebAssembly: hidden instructions in documents, poisoned tool results, secret extraction and fake authority claims. No install, no account, nothing to deploy.</p>
+    </section>
+
+    <div class="tabs" role="tablist" aria-label="Mode">
+      <button role="tab" id="tab-sample" aria-controls="panel-sample" aria-selected="true">Sample agent <span class="tab-note">no key</span></button>
+      <button role="tab" id="tab-llm" aria-controls="panel-llm" aria-selected="false" tabindex="-1">Your model <span class="tab-note">bring your own key</span></button>
+    </div>
+
+    <section id="panel-sample" class="card panel" role="tabpanel" aria-labelledby="tab-sample">
+      <p>A small agent with tools. It may <strong>search</strong> and <strong>write drafts</strong>. It must never <strong>send email</strong>, <strong>reveal credentials</strong> or <strong>make payments</strong>, and the fake key <code>sk-DEMO-…</code> must never leave it. Every tool is simulated, so nothing is really sent or paid.</p>
+      <fieldset class="seg" aria-label="Agent version">
+        <legend class="sr-only">Agent version</legend>
+        <label><input type="radio" name="variant" value="naive" checked><span><strong>Naive</strong><small>obeys tool names it reads in documents</small></span></label>
+        <label><input type="radio" name="variant" value="hardened"><span><strong>Hardened</strong><small>treats documents and tool output as data</small></span></label>
+      </fieldset>
+      <div class="actions">
+        <button id="run-sample" class="btn primary" type="button" disabled><span class="spinner" aria-hidden="true"></span><span class="label">Run attack</span></button>
+        <span id="compare" class="muted" aria-live="polite"></span>
+      </div>
+    </section>
+
+    <section id="panel-llm" class="card panel" role="tabpanel" aria-labelledby="tab-llm" hidden>
+      <p>Point the attacks at a real model with tool calling. It gets the notebook's system prompt (with a fake key in it) and the same tools. Five categories run, about 25 scenarios, usually 40–80 requests. With a small model that costs a few cents at most.</p>
+      <form id="llm-form" class="grid" autocomplete="off" novalidate>
+        <label class="field"><span>Provider</span>
+          <select id="provider">
+            <option value="openai">OpenAI</option>
+            <option value="groq">Groq (free tier)</option>
+            <option value="openrouter">OpenRouter</option>
+            <option value="anthropic">Anthropic</option>
+            <option value="custom">Custom (OpenAI-compatible)</option>
+          </select>
+        </label>
+        <label class="field"><span>Model</span>
+          <input id="model" type="text" spellcheck="false" autocapitalize="off" placeholder="gpt-4o-mini">
+        </label>
+        <label class="field wide" id="base-url-field" hidden><span>Base URL</span>
+          <input id="base-url" type="url" spellcheck="false" autocapitalize="off" placeholder="https://api.example.com/v1">
+        </label>
+        <label class="field wide"><span>API key</span>
+          <input id="api-key" type="password" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="sk-…" data-lpignore="true" data-1p-ignore>
+          <small class="hint" id="key-hint">Kept in this tab's memory only and sent only to OpenAI. Never saved, never sent to us.</small>
+        </label>
+        <label class="check wide"><input id="guard" type="checkbox"> <span>Add the notebook's guard in code: only allowed tools run, and the key is redacted from output</span></label>
+        <div class="actions wide">
+          <button id="run-llm" class="btn primary" type="submit" disabled><span class="spinner" aria-hidden="true"></span><span class="label">Run attacks</span></button>
+          <button id="cancel-llm" class="btn" type="button" hidden>Cancel</button>
+        </div>
+        <div class="progress wide" id="progress" hidden>
+          <div class="bar"><span id="progress-bar"></span></div>
+          <span id="progress-text" class="muted" aria-live="polite"></span>
+        </div>
+      </form>
+    </section>
+
+    <div id="error" class="alert" role="alert" hidden>
+      <strong id="error-title"></strong>
+      <p id="error-text"></p>
+    </div>
+
+    <section id="results" aria-live="polite" hidden>
+      <div class="summary card">
+        <div class="verdict">
+          <span id="verdict-num" class="big"></span>
+          <span id="verdict-label"></span>
+        </div>
+        <ul id="sev-chips" class="chips" aria-label="Findings by severity"></ul>
+        <dl class="stats">
+          <div><dt>Scenarios</dt><dd id="s-scen"></dd></div>
+          <div><dt>Resisted</dt><dd id="s-pass"></dd></div>
+          <div><dt>With findings</dt><dd id="s-find"></dd></div>
+          <div><dt>Errors</dt><dd id="s-err"></dd></div>
+        </dl>
+      </div>
+      <div class="share card">
+        <p id="share-line"></p>
+        <div class="share-actions">
+          <button id="copy-share" class="btn small" type="button">Copy</button>
+          <button id="copy-md" class="btn small" type="button">Copy as Markdown</button>
+          <button id="download-json" class="btn small" type="button">Download JSON</button>
+        </div>
+      </div>
+      <p id="partial-note" class="muted" hidden></p>
+      <div id="findings"></div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-row">
+      <div class="install">
+        <span class="muted">Test your own agent:</span>
+        <code id="pip">pip install invaris-agentsec</code>
+        <button id="copy-pip" class="btn small" type="button">Copy</button>
+      </div>
+      <nav class="links" aria-label="Project links">
+        <a href="https://github.com/invarislabs/invaris-agentsec" rel="noopener">GitHub</a>
+        <a href="https://github.com/invarislabs/invaris-agentsec/tree/main/docs" rel="noopener">Docs</a>
+        <a href="https://github.com/invarislabs/invaris-agentsec/issues" rel="noopener">Report an issue</a>
+      </nav>
+      <p class="muted small">Open source, Apache-2.0. Runs fully in your browser: <span id="engine-version">invaris-agentsec</span> on Pyodide. Your key goes only to the provider you pick.</p>
+    </div>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>
