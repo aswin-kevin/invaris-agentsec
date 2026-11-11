@@ -41,7 +41,8 @@ def _rule(rule_id: str, findings: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 
 def _message(finding: Dict[str, Any]) -> str:
-    parts = [finding["title"], "", "Scenario: %s" % finding["scenario_id"],
+    title = finding["title"] + (" (irreversible)" if finding.get("irreversible") else "")
+    parts = [title, "", "Scenario: %s" % finding["scenario_id"],
               "Observed: %s" % finding["observed_action"]]
     if finding["remediation"]:
         parts.append("Remediation: %s" % finding["remediation"])
@@ -50,6 +51,15 @@ def _message(finding: Dict[str, Any]) -> str:
 
 def _result(finding: Dict[str, Any], run_config: Dict[str, Any]) -> Dict[str, Any]:
     policy_path = run_config.get("policy_path") or "agentsec.yaml"
+    properties = {
+        "severity": finding["severity"],
+        "category": finding["category"],
+        "scenarioId": finding["scenario_id"],
+        "source": finding.get("source", "deterministic"),
+    }
+    if finding.get("irreversible"):
+        properties["irreversible"] = True
+        properties["tags"] = ["irreversible"]
     return {
         "ruleId": finding["rule"],
         "level": _LEVEL[finding["severity"]],
@@ -60,12 +70,7 @@ def _result(finding: Dict[str, Any], run_config: Dict[str, Any]) -> Dict[str, An
             },
         }],
         "partialFingerprints": {"agentsecFindingId": finding["id"]},
-        "properties": {
-            "severity": finding["severity"],
-            "category": finding["category"],
-            "scenarioId": finding["scenario_id"],
-            "source": finding.get("source", "deterministic"),
-        },
+        "properties": properties,
     }
 
 

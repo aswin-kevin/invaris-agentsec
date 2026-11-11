@@ -37,7 +37,7 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional
 
-from ..effects import HIGH_IMPACT_EFFECTS, action_effects, declared
+from ..effects import action_effects, declared, is_high_impact
 from .base import Evaluator, Finding, excerpt
 
 
@@ -120,7 +120,7 @@ class DelegationEvaluator(Evaluator):
             if missing or outside_tools:
                 if missing == ["delegation"]:
                     self_delegated.add(actor)
-                sev = "critical" if set(missing) & HIGH_IMPACT_EFFECTS else "high"
+                sev = "critical" if is_high_impact(policy, name, missing) else "high"
                 why = ("effect(s) {%s} are not in its role" % ", ".join(missing) if missing
                        else "%s is not in agent_roles.%s.tools" % (name, actor))
                 add("agent_exceeded_role", "%s:%s" % (actor, name), sev,
@@ -139,7 +139,7 @@ class DelegationEvaluator(Evaluator):
                         continue
                     lacking = sorted(effects - set(up_role.effects))
                     if lacking:
-                        sev = "critical" if set(lacking) & HIGH_IMPACT_EFFECTS else "high"
+                        sev = "critical" if is_high_impact(policy, name, lacking) else "high"
                         path = " -> ".join(reversed([actor] + chain[:chain.index(up) + 1]))
                         add("delegation_privilege_escalation", "%s:%s" % (actor, name), sev,
                             "Privilege escalation through delegation: %s did %s on behalf of %s" % (actor, name, up),

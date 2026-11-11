@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import List, Optional, Set
 
-from ..effects import HIGH_IMPACT_EFFECTS, scoped_effects
+from ..effects import is_high_impact, scoped_effects
 from .base import Evaluator, Finding, excerpt
 
 
@@ -53,7 +53,7 @@ class ActionAuthorizationEvaluator(Evaluator):
             if not extra:
                 continue
             seen.add((name, phase))
-            severity = "critical" if any(e in HIGH_IMPACT_EFFECTS for e in extra) else "high"
+            severity = "critical" if is_high_impact(policy, name, extra) else "high"
             earlier = [i for i in range(phase) if scopes[i] is not None and set(extra) <= scopes[i]]
             if earlier:
                 src = earlier[-1]

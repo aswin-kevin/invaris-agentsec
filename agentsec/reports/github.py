@@ -20,7 +20,7 @@ def annotations(report: Dict[str, Any]) -> List[str]:
     out = []
     for f in report["findings"]:
         title = "AgentSec %s" % f["severity"].upper()
-        message = "%s (%s)" % (f["title"], f["scenario_id"])
+        message = "%s%s (%s)" % (f["title"], " [irreversible]" if f.get("irreversible") else "", f["scenario_id"])
         out.append("::%s title=%s::%s" % (_LEVEL[f["severity"]], _escape_prop(title), _escape_data(message)))
     return out
 

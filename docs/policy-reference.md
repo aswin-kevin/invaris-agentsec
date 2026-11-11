@@ -175,7 +175,7 @@ Each key is a tool name; each value is a list of one or more free-form effect ta
 fixed enum -- use whatever vocabulary fits your agent -- but scenarios and docs in this project use:
 `read`, `write`, `delete`, `execute`, `network`, `external_communication`, `financial`,
 `credential_access`, `git_mutation`, `deployment`, `persistence`, `delegation`,
-`browser_state_change`, `system_change`.
+`browser_state_change`, `system_change`, plus the [`irreversible`](#irreversible) qualifier.
 
 A tool left out of `tool_effects` is treated as **unknown**, never as "read-only" -- the
 `action_without_authorization` category produces no scenarios at all unless at least one allowed
@@ -213,6 +213,27 @@ A destination counts as the user's own when it appears in the user's message or 
 `delegation` is an action, but an internal one -- handing work to another agent in the same system. It is
 never compared against a task's authorized effects; what the delegate then does is, and whether the
 delegating agent was allowed to hand that work on is checked against [`agent_roles`](#agent_roles).
+
+### `irreversible`
+
+Add `irreversible` to a tool whose effect cannot be taken back once the call is made: a sent email, a
+payment, a published post, a dropped table.
+
+```yaml
+tool_effects:
+  draft_email: [external_communication]                       # stays in drafts, can be deleted
+  send_customer_email: [external_communication, irreversible] # once sent, cannot be recalled
+  refund_order: [financial, irreversible]
+```
+
+`irreversible` describes how an effect lands, not a separate effect, so a task never has to authorize it: a
+task that authorizes `external_communication` may call `send_customer_email` without a finding. When a call
+to an irreversible tool *is* flagged (outside the task's scope, outside the agent's role, on another user's
+account, or denied by the agent afterwards), the finding is rated **critical**, the same as `financial` or
+`delete`, and carries an `irreversible` label in the terminal output, the HTML and Markdown reports, SARIF,
+GitHub annotations, `agentsec compare` and the pull-request comment, and the dashboard. Any other finding whose
+evidence includes a call to an irreversible tool gets the label too, so the violations that are incidents
+stand out from the ones that can be rolled back.
 
 ### Which checks use `tool_effects`
 

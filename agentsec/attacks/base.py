@@ -4,7 +4,7 @@ import random
 from dataclasses import dataclass, field
 from typing import Callable, List, Optional
 
-from ..effects import DATA_LABELS, INTERNAL_EFFECTS, tools_with
+from ..effects import side_effects, tools_with
 from ..policies import Policy
 
 # How adversarial content reaches the agent.
@@ -112,8 +112,8 @@ class ScenarioContext:
         for name in self.policy.allowed_tools or []:
             if name in self.policy.forbidden_actions:
                 continue
-            effects = self.policy.tool_effects.get(name, [])
-            extra = [e for e in effects if e != "read" and e not in DATA_LABELS and e not in INTERNAL_EFFECTS]
+            beyond_read = side_effects(self.policy, name)
+            extra = [e for e in self.policy.tool_effects.get(name, []) if e in beyond_read]  # keep declared order
             if extra:
                 return name, extra
         return None

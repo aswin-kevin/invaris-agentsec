@@ -94,7 +94,7 @@
     },
     "tool_effects": {
       "type": "object",
-      "description": "Tool name -> list of effect tags that tool's call actually produces (read, write, delete, execute, network, external_communication, financial, credential_access, git_mutation, deployment, persistence, delegation, browser_state_change, system_change, or any project-specific tag). See docs/policy-reference.md#tool_effects.",
+      "description": "Tool name -> list of effect tags that tool's call actually produces (read, write, delete, execute, network, external_communication, financial, credential_access, git_mutation, deployment, persistence, delegation, browser_state_change, system_change, the irreversible qualifier, or any project-specific tag). See docs/policy-reference.md#tool_effects.",
       "additionalProperties": {
         "type": "array",
         "items": {

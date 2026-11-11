@@ -41,8 +41,9 @@ def render_markdown(report: Dict[str, Any]) -> str:
         lines += ["", "| Severity | Finding | Scenario | OWASP |", "|---|---|---|---|"]
         for f in sorted(report["findings"], key=lambda f: _ORDER.index(f["severity"])):
             owasp = ", ".join(o["id"] for o in f.get("owasp", []))
+            title = _cell(f["title"]) + (" **(irreversible)**" if f.get("irreversible") else "")
             lines.append("| %s %s | %s | `%s` | %s |" % (
-                _ICON[f["severity"]], f["severity"], _cell(f["title"]), f["scenario_id"], owasp))
+                _ICON[f["severity"]], f["severity"], title, f["scenario_id"], owasp))
     for w in report.get("warnings", []):
         lines += ["", "> %s" % w]
     lines += ["", "Seed `%s` · policy `%s`" % (report["run_config"]["seed"],

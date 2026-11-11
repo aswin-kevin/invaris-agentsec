@@ -320,6 +320,7 @@ tbody tr.link:hover td{background:var(--hover)}
 .timeline+.timeline{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
 .timeline li::marker{color:var(--ink-3)}
 .tag.mark-delivered{background:color-mix(in srgb,var(--medium) 22%,transparent);color:var(--ink)}
+.tag.irreversible{background:color-mix(in srgb,var(--critical) 14%,transparent);color:var(--ink);font-weight:600}
 .tag.mark-goal{background:color-mix(in srgb,var(--critical) 14%,transparent);color:var(--ink)}
 td.change{white-space:nowrap;font-size:13px}
 td.change.bad{color:var(--critical)}td.change.good{color:var(--ok)}td.change.warn{color:var(--ink);font-weight:500}

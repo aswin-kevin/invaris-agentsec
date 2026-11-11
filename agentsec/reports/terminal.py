@@ -42,7 +42,8 @@ def render_terminal(suite: SuiteResult, report_path: Union[str, Sequence[str]] =
     sensitive = suite.policy.resolved_secrets() + [v for f in findings for v in f.sensitive]
     for f in findings:
         label = paint(f.severity.upper().ljust(9), _COLORS[f.severity])
-        tag = " [model-assisted]" if f.source == "model-assisted" else ""
+        tag = " [irreversible]" if f.irreversible else ""
+        tag += " [model-assisted]" if f.source == "model-assisted" else ""
         lines.append("%s %s%s" % (label, f.title, tag))
         lines.append("          %s" % paint("%s  |  %s" % (f.scenario_id, f.policy_violated), _DIM))
         if verbose:

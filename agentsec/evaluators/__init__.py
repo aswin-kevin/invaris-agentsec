@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from ..effects import is_irreversible
 from .authorization import ActionAuthorizationEvaluator
 from .claims import ActionClaimEvaluator
 from .dataflow import DataFlowEvaluator
@@ -32,7 +33,14 @@ def evaluate_trace(scenario, trace, policy, judge: Optional[JudgeEvaluator] = No
         findings.extend(cls().evaluate(scenario, trace, policy))
     if judge is not None:
         findings.extend(judge.evaluate(scenario, trace, policy, findings))
+    for finding in findings:
+        finding.irreversible = finding.irreversible or _calls_irreversible_tool(finding, policy)
     return findings
+
+
+def _calls_irreversible_tool(finding: Finding, policy) -> bool:
+    return any(ev.get("type") == "tool_call" and is_irreversible(policy, ev.get("tool_name"))
+               for ev in finding.evidence)
 
 
 __all__ = ["SEVERITIES", "Evaluator", "Finding", "severity_rank", "evaluate_trace", "JudgeEvaluator",

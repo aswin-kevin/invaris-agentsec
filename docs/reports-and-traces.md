@@ -78,6 +78,8 @@ The id is `scenario_id:rule` plus a key when a scenario can have several of the 
 memory conversation gets a `:later` suffix).
 
 `source` is `deterministic` for rule-based findings and `model-assisted` for judge findings. Judge findings also have a `confidence` from 0 to 1.
+`irreversible: true` appears when the finding's evidence includes a call to a tool the policy tags
+[`irreversible`](policy-reference.md#irreversible); the field is left out otherwise.
 `owasp` lists the closest OWASP agentic categories. See [OWASP mapping](owasp-mapping.md).
 `evidence` holds the relevant trace events, and their `seq` numbers point into the scenario's full trace.
 

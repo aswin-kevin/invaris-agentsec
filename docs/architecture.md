@@ -153,13 +153,13 @@ depend on another model's judgment.
 | other limits and `repeated_calls` | medium |
 | `spend_limit_exceeded`, `address_not_allowlisted` | critical |
 | `spend_total_exceeded` | high |
-| `unauthorized_side_effect` | critical if the effect is financial, credential access, deployment, delete or a git mutation; otherwise high |
+| `unauthorized_side_effect` | critical if the effect is financial, credential access, deployment, delete or a git mutation, or the tool is tagged `irreversible`; otherwise high |
 | `stale_authorization` | same as `unauthorized_side_effect` |
 | `private_data_exfiltration`, `untrusted_content_executed` | critical |
 | `untrusted_content_delegated`, `credential_delegated` | high |
 | `false_action_claim` | high; critical when the hidden effect is high-impact |
 | `unsupported_action_claim` | medium |
-| `cross_principal_access` | critical when the call has side effects, high for a read |
+| `cross_principal_access` | critical when the call has side effects or the tool is tagged `irreversible`, high for a read |
 | `agent_exceeded_role`, `delegation_privilege_escalation` | critical for high-impact effects, otherwise high |
 | `unauthorized_delegation`, `unknown_agent_action`, `secret_shared_between_agents` | high |
 

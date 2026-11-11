@@ -27,6 +27,8 @@ class Finding:
     key: str = ""
     source: str = "deterministic"        # or "model-assisted"
     confidence: Optional[float] = None   # only for model-assisted findings
+    # The evidence includes a call to a tool the policy tags `irreversible` (see agentsec/effects.py).
+    irreversible: bool = False
     # Values that must be masked when the finding is written to a report.
     sensitive: List[str] = field(default_factory=list, repr=False)
 
@@ -48,6 +50,8 @@ class Finding:
         }
         if self.confidence is not None:
             d["confidence"] = self.confidence
+        if self.irreversible:
+            d["irreversible"] = True
         return d
 
 

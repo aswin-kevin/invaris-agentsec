@@ -41,6 +41,7 @@ th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);font-
 th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
 tr:last-child td{border-bottom:0}.tag{background:var(--code);border-radius:6px;padding:1px 7px;
 font-size:12px;margin-right:4px;white-space:nowrap}
+.tag.irreversible{color:var(--critical);border:1px solid var(--critical);font-weight:600}
 .warn{background:var(--card);border-left:4px solid var(--medium);padding:8px 12px;border-radius:6px}
 @media (max-width:600px){dl{grid-template-columns:1fr}}
 """
@@ -57,6 +58,8 @@ def _pill(sev: str) -> str:
 def _tags(finding: Dict[str, Any]) -> str:
     out = "".join('<span class="tag">%s %s</span>' % (_e(o["id"]), _e(o["name"]))
                   for o in finding.get("owasp", []))
+    if finding.get("irreversible"):
+        out += '<span class="tag irreversible">irreversible</span>'
     if finding.get("source") == "model-assisted":
         out += '<span class="tag">model-assisted</span>'
     return out

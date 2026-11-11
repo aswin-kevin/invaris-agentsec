@@ -99,6 +99,10 @@ def _status_name(status: Any) -> str:
     return "missing" if status is None else str(status).replace("_", " ")
 
 
+def _irreversible_mark(finding: Dict[str, Any]) -> str:
+    return " (irreversible)" if finding.get("irreversible") else ""
+
+
 def render(c: Comparison) -> str:
     lines: List[str] = []
     for w in c.warnings:
@@ -110,7 +114,8 @@ def render(c: Comparison) -> str:
         if items:
             lines.append("%s (%d)" % (title, len(items)))
             for f in sorted(items, key=lambda x: (-severity_rank(x["severity"]), x["id"])):
-                lines.append("  %s %-8s %s  [%s]" % (mark, f["severity"], f["title"], f["scenario_id"]))
+                lines.append("  %s %-8s %s%s  [%s]" % (mark, f["severity"], f["title"], _irreversible_mark(f),
+                                                      f["scenario_id"]))
             lines.append("")
 
     block("NEW findings", c.new, "+")
@@ -163,7 +168,8 @@ def render_markdown(c: Comparison, baseline_label: str = "baseline", current_lab
         lines.append("<summary>%s (%d)</summary>" % (title, len(items)))
         lines.append("")
         for f in sorted(items, key=lambda x: (-severity_rank(x["severity"]), x["id"])):
-            lines.append("- **%s** %s (`%s`)" % (f["severity"].upper(), f["title"], f["scenario_id"]))
+            lines.append("- **%s** %s%s (`%s`)" % (f["severity"].upper(), f["title"], _irreversible_mark(f),
+                                                  f["scenario_id"]))
         lines.append("")
         lines.append("</details>")
         lines.append("")

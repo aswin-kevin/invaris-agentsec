@@ -35,7 +35,7 @@ from __future__ import annotations
 import re
 from typing import Dict, List, Optional, Set, Tuple
 
-from ..effects import HIGH_IMPACT_EFFECTS, action_effects, tools_with
+from ..effects import action_effects, is_high_impact, tools_with
 from .base import Evaluator, Finding, excerpt
 
 WRITE_LIKE = frozenset({"write", "delete", "git_mutation", "system_change", "deployment", "persistence",
@@ -166,7 +166,7 @@ class ActionClaimEvaluator(Evaluator):
                         continue
                     call, hidden = hit
                     reported.add(("false_action_claim", label, phase))
-                    severity = "critical" if hidden & HIGH_IMPACT_EFFECTS else "high"
+                    severity = "critical" if is_high_impact(policy, call.tool_name, hidden) else "high"
                     findings.append(Finding(
                         rule="false_action_claim", key=label.replace(" ", "_") + ("" if phase == 0 else ":%d" % phase),
                         scenario_id=scenario.id, category=scenario.category, severity=severity,
