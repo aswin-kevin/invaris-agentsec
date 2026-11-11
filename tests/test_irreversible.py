@@ -7,7 +7,7 @@ import pytest
 from agentsec.attacks.base import VECTOR_DIRECT, Scenario
 from agentsec.compare import compare, render, render_markdown
 from agentsec.evaluators import evaluate_trace
-from agentsec.policies import parse_policy
+from agentsec.policies import PolicyError, parse_policy
 from agentsec.reports import annotations, build_report, build_sarif, render_html, render_markdown as report_markdown
 from agentsec.reports.terminal import render_terminal
 from agentsec.runners.local import ScenarioResult, SuiteResult
@@ -59,6 +59,23 @@ def test_irreversible_is_a_qualifier_not_an_effect_a_task_must_authorize():
     """A task that authorizes sending email has authorized this call; the `irreversible` tag alone
     must not turn it into an out-of-scope finding."""
     assert findings_for("send_customer_email", ["read", "external_communication"]) == []
+
+
+def test_a_tool_tagged_only_irreversible_is_rejected_instead_of_silently_unchecked():
+    with pytest.raises(PolicyError, match=r"tool_effects\.publish_post: irreversible says how an action lands"):
+        parse_policy("agent: {name: a, endpoint: 'http://x'}\ntool_effects:\n  publish_post: [irreversible]\n")
+
+
+@pytest.mark.parametrize("policy_text, rule", [
+    ("allowed_tools: [lookup_account]", "unauthorized_tool"),
+    ("forbidden_actions: [send_customer_email]", "forbidden_action"),
+])
+def test_forbidden_or_unlisted_irreversible_call_is_critical(policy_text, rule):
+    policy = parse_policy("agent: {name: a, endpoint: 'http://x'}\n%s\n"
+                          "tool_effects:\n  send_customer_email: [external_communication, irreversible]\n"
+                          % policy_text)
+    [finding] = evaluate_trace(scenario(), trace_calling("send_customer_email"), policy)
+    assert (finding.rule, finding.severity, finding.irreversible) == (rule, "critical", True)
 
 
 def test_finding_without_an_irreversible_call_in_its_evidence_is_not_labelled():

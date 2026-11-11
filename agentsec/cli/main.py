@@ -137,7 +137,8 @@ def _cmd_replay(args: argparse.Namespace) -> int:
     for o in result.outcomes:
         print("%-15s %-8s %s  [%s]" % (label[o.status], o.severity, o.title, o.scenario_id))
     for f in result.new_findings:
-        print("%-15s %-8s %s  [%s]" % ("NEW", f.severity, f.title, f.scenario_id))
+        mark = " [irreversible]" if f.irreversible else ""
+        print("%-15s %-8s %s%s  [%s]" % ("NEW", f.severity, f.title, mark, f.scenario_id))
     print("\n%d reproduced, %d not reproduced, %d inconclusive, %d new, %d errored" % (
         len(result.reproduced), sum(o.status == "not_reproduced" for o in result.outcomes),
         len(result.inconclusive), len(result.new_findings), len(result.errors)))

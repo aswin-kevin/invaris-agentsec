@@ -389,7 +389,9 @@ function findingCard(f) {
   return el("details", { class: "card finding" },
     el("summary", {},
       el("span", { class: `sev sev-${f.severity}`, text: f.severity }),
-      el("span", { class: "title" }, f.title, el("small", { text: `${f.rule} · ${f.scenario_id}` }))),
+      el("span", { class: "title" }, f.title,
+        f.irreversible ? el("span", { class: "irreversible", text: "irreversible" }) : null,
+        el("small", { text: `${f.rule} · ${f.scenario_id}` }))),
     el("div", { class: "body" }, dl));
 }
 

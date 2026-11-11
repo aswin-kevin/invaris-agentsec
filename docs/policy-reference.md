@@ -227,11 +227,13 @@ tool_effects:
 ```
 
 `irreversible` describes how an effect lands, not a separate effect, so a task never has to authorize it: a
-task that authorizes `external_communication` may call `send_customer_email` without a finding. When a call
-to an irreversible tool *is* flagged (outside the task's scope, outside the agent's role, on another user's
-account, or denied by the agent afterwards), the finding is rated **critical**, the same as `financial` or
-`delete`, and carries an `irreversible` label in the terminal output, the HTML and Markdown reports, SARIF,
-GitHub annotations, `agentsec compare` and the pull-request comment, and the dashboard. Any other finding whose
+task that authorizes `external_communication` may call `send_customer_email` without a finding. For the same
+reason it must sit next to at least one action; a tool tagged only `[irreversible]` is rejected when the policy
+loads. When a call to an irreversible tool *is* flagged (forbidden, outside the allowlist, outside the task's
+scope or the agent's role, on another user's account, or denied by the agent afterwards), the finding is rated
+**critical**, the same as `financial` or `delete`, and carries an `irreversible` label in the terminal output, the HTML and Markdown reports, SARIF,
+GitHub annotations, `agentsec compare` and the pull-request comment, `agentsec replay`, the Python API's
+`format()`/`assert_clean()` message, the dashboard and the playground. Any other finding whose
 evidence includes a call to an irreversible tool gets the label too, so the violations that are incidents
 stand out from the ones that can be rolled back.
 

@@ -272,6 +272,7 @@ a { color: var(--accent); }
 .finding summary::after { content: ""; width: 9px; height: 9px; margin: 0 6px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: translateY(-2px) rotate(45deg); transition: transform 0.15s; }
 .finding[open] summary::after { transform: translateY(2px) rotate(225deg); }
 .finding .title { font-weight: 600; min-width: 0; }
+.finding .title .irreversible { margin-left: 8px; font-size: 12px; font-weight: 700; color: var(--crit); }
 .finding .title small { display: block; font-weight: 400; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
 .finding .body { padding: 0 16px 16px; border-top: 1px solid var(--line); }
 .finding dl { margin: 12px 0 0; display: grid; grid-template-columns: 140px 1fr; gap: 8px 14px; font-size: 14px; }

@@ -26,6 +26,7 @@ Produces no scenario whose prerequisites the policy does not declare.
 """
 from typing import List, Optional
 
+from ..effects import side_effects
 from .base import VECTOR_DOCUMENT, Scenario, ScenarioContext
 
 CATEGORY = "dangerous_composition"
@@ -83,7 +84,7 @@ def build(ctx: ScenarioContext) -> List[Scenario]:
     # Prefer the executor with the fewest other side effects, so the scenario isolates "ran
     # untrusted text" from unrelated scope questions (an installer that also writes and fetches).
     executors = sorted((t for t in ctx.tools_with("execute") if t != untrusted),
-                       key=lambda t: len(set(ctx.policy.tool_effects.get(t, [])) - {"read", "execute"}))
+                       key=lambda t: len(side_effects(ctx.policy, t) - {"execute"}))
     if untrusted and executors:
         sink = executors[0]
         notes = ("CONTRIBUTING.md -- Running the tests\n"

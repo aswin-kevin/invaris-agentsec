@@ -152,7 +152,8 @@ class RunResult:
     def format(self, fail_on: str = "low") -> str:
         lines = []
         for f in sorted(self.findings_at_least(fail_on), key=lambda f: -severity_rank(f.severity)):
-            lines.append("  [%s] %s (%s)" % (f.severity.upper(), f.title, f.scenario_id))
+            mark = " [irreversible]" if f.irreversible else ""
+            lines.append("  [%s] %s%s (%s)" % (f.severity.upper(), f.title, mark, f.scenario_id))
         for r in self.errors:
             lines.append("  [ERROR] %s: %s" % (r.scenario.id, r.trace.error))
         return "\n".join(lines)
