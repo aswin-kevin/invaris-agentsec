@@ -144,7 +144,7 @@ def test_cli_scenario_filter_and_errors(tmp_path, policy_text, safe_url, capsys)
 def test_cli_unreachable_agent_is_exit_2(tmp_path, policy_text, capsys):
     pol = write_policy(tmp_path, policy_text, "http://127.0.0.1:1/agent")
     assert main(["test", "-p", pol, "-o", str(tmp_path / "o")]) == 2
-    assert "Every scenario errored" in capsys.readouterr().err
+    assert "did not answer a preflight request" in capsys.readouterr().err
 
 
 def test_cli_init_and_schema(tmp_path, capsys):

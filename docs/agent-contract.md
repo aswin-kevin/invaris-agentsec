@@ -42,6 +42,9 @@ Accepted variations:
 - `usage.prompt_tokens` and `usage.completion_tokens` feed the token, and if `agent.pricing` is set, cost limits.
 - Authentication: set `agent.api_key_env` and AgentSec sends `Authorization: Bearer <value>`.
 - Session identity: every request carries `"user": "<session id>"` and an `X-AgentSec-Session` header. See below.
+- Preflight: before the first scenario, `agentsec test` sends one plain request with no tools in session
+  `agentsec-preflight`, asking for a short acknowledgement. If it fails (unreachable, HTTP error, invalid JSON, or a reply
+  that matches neither shape above), the run stops with the error and exit code 2 instead of erroring every scenario.
 
 ## Sessions and memory
 

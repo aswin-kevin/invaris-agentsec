@@ -160,9 +160,11 @@ def parse_policy(text: str) -> Policy:
         raise PolicyError("`agent` section is required")
     a = _mapping("agent", raw["agent"])
     _check_keys("agent", a, _AGENT)
-    for req in ("name", "endpoint"):
-        if not isinstance(a.get(req), str) or not a[req]:
-            raise PolicyError("agent.%s is required and must be a string" % req)
+    if not isinstance(a.get("name"), str) or not a["name"]:
+        raise PolicyError("agent.name is required and must be a string")
+    if not isinstance(a.get("endpoint"), str) or not a["endpoint"]:
+        raise PolicyError("agent.endpoint is not set. Set agent.endpoint to your agent's URL "
+                          "(see docs/agent-contract.md)")
     if not a["endpoint"].startswith(("http://", "https://")):
         raise PolicyError("agent.endpoint must start with http:// or https://")
 

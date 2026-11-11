@@ -113,6 +113,10 @@ Never point it at production. See the Security Model in the main README.
 | `--mcp-listen HOST:PORT` | off | Run AgentSec as the MCP server your agent connects to. See [MCP testing](mcp-testing.md#testing-an-agent-that-uses-mcp---mcp-listen) |
 | `-v, --verbose` | off | Print progress and per-finding detail |
 
+Before running any scenario, `agentsec test` checks the agent: it stops with exit code 2 and a clear error when
+`agent.endpoint` is still the placeholder `agentsec init` writes, or when one preflight request to the endpoint fails
+(see [Agent contract](agent-contract.md)).
+
 Examples:
 
 ```bash
@@ -187,7 +191,7 @@ Prints the JSON Schema for the policy file or for a trace, for editor validation
 |---|---|
 | 0 | Run completed and no finding reached the `--fail-on` threshold |
 | 1 | At least one finding reached the `--fail-on` threshold |
-| 2 | Configuration error (bad policy, unknown category or scenario, unreadable report or pin file, MCP server that cannot be reached) or every scenario errored, usually because the agent is unreachable. For `replay`, also when a replayed scenario could not run, or when nothing reproduced but at least one replayed scenario was `inconclusive` (its adversarial content never reached the agent, so the rerun cannot show the finding is fixed) |
+| 2 | Configuration error (bad policy, missing or placeholder `agent.endpoint`, unknown category or scenario, unreadable report or pin file, MCP server that cannot be reached), an agent that fails the preflight request, or every scenario errored. For `replay`, also when a replayed scenario could not run, or when nothing reproduced but at least one replayed scenario was `inconclusive` (its adversarial content never reached the agent, so the rerun cannot show the finding is fixed) |
 
 ## In GitHub Actions
 
@@ -197,8 +201,11 @@ See [GitHub Actions](github-actions.md) for the packaged action, or [Testing](te
 
 ## Troubleshooting
 
-**`cannot reach agent at ...: Connection refused`**: the agent is not running or the port is wrong.
-The bundled policy uses port 8000. If every scenario errors, AgentSec exits with code 2.
+**`agent.endpoint is not set` or `agent.endpoint is still the placeholder`**: set `agent.endpoint` in your
+policy to your agent's URL. `agentsec init` writes `https://your-agent.example/...`, which never resolves on purpose.
+
+**`did not answer a preflight request: cannot reach agent at ...: Connection refused`**: the agent is not running or
+the port is wrong. The bundled policy uses port 8000. No scenario runs and AgentSec exits with code 2.
 
 **`unknown key(s) in policy`**: typos are rejected on purpose so a misspelled limit is not silently
 ignored. The message lists the allowed keys.

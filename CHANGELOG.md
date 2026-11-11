@@ -5,6 +5,11 @@ version is below 1.0, minor releases may change behaviour, and the changes are l
 
 ## Unreleased
 
+- New: `agentsec test` checks the agent before running any scenario. A missing `agent.endpoint`, or the placeholder
+  `agentsec init` now writes (`https://your-agent.example/...`), stops the run with a message that says what to set
+  and links the agent contract. One preflight request (no tools, session `agentsec-preflight`) catches an
+  unreachable endpoint or a reply that is not OpenAI-style, with the URL and the error. All exit with code 2, so a
+  broken setup is never confused with findings (exit 1). (#58)
 - New: browser playground (`playground/`, deployed to GitHub Pages by `.github/workflows/playground.yml`). The
   real package runs in Pyodide inside a Web Worker. Sample mode runs the quickstart notebook's agent (naive: 8
   critical findings, hardened: 0). Bring-your-own-key mode runs five categories against OpenAI, Groq, OpenRouter,
