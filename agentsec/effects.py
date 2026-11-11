@@ -64,6 +64,13 @@ def action_effects(policy, tool: Optional[str]) -> Set[str]:
     return declared(policy, tool) - DATA_LABELS - QUALIFIERS
 
 
+def qualifies_no_action(tags: Iterable[str]) -> bool:
+    """Whether `tags` carry a qualifier but no action for it to qualify, e.g. `[irreversible]` or
+    `[private_data, irreversible]`. Such a tool would look "unknown" to every check, so policies reject it."""
+    tags = set(tags)
+    return bool(tags & QUALIFIERS) and not (tags - QUALIFIERS - DATA_LABELS)
+
+
 def is_irreversible(policy, tool: Optional[str]) -> bool:
     """Whether the policy tags `tool` as `irreversible`: once called, its effect cannot be undone."""
     return IRREVERSIBLE in declared(policy, tool)

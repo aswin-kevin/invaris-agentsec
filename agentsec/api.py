@@ -23,6 +23,7 @@ from .adapters import AgentAdapter, HTTPAgentAdapter
 from .attacks import CATEGORIES
 from .evaluators import Finding, severity_rank
 from .policies import AgentConfig, Limits, Policy, PolicyError, Pricing, load_policy
+from .policies.loader import check_tool_effects
 from .policies.schema import _sha
 from .runners import ScenarioResult, SuiteResult, run_suite
 
@@ -43,6 +44,8 @@ class AgentTarget:
                  judge: Optional[Any] = None, attack_packs: Iterable[str] = ()):
         if not endpoint.startswith(("http://", "https://")):
             raise PolicyError("endpoint must start with http:// or https://")
+        tool_effects = {k: list(v) for k, v in (tool_effects or {}).items()}
+        check_tool_effects(tool_effects)
         agent = AgentConfig(
             name=name or endpoint, endpoint=endpoint, model=model, api_key_env=api_key_env,
             headers=dict(headers or {}), timeout_s=timeout_s, declare_tools=declare_tools, stream=stream,
@@ -51,7 +54,7 @@ class AgentTarget:
             agent=agent,
             allowed_tools=sorted(allowed_tools) if allowed_tools is not None else None,
             forbidden_actions=sorted(forbidden_tools), secrets=list(secrets),
-            tool_effects={k: list(v) for k, v in (tool_effects or {}).items()},
+            tool_effects=tool_effects,
             limits=Limits(max_steps=max_steps, max_tool_calls=max_tool_calls,
                           max_repeated_calls=max_repeated_calls, max_tokens=max_tokens,
                           max_seconds=max_seconds, max_cost_usd=max_cost_usd),

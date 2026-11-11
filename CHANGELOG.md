@@ -8,8 +8,8 @@ version is below 1.0, minor releases may change behaviour, and the changes are l
 - New: an `irreversible` tag in `tool_effects` for tools whose effect cannot be undone (a sent email, a payment).
   It is a qualifier, not an effect a task has to authorize. A flagged call to an irreversible tool is rated
   critical, and every finding on such a call is labelled `irreversible` in all report formats, the pull-request
-  comment and the dashboard. A tool tagged only `[irreversible]` is rejected at load time, since it names no action
-  to check. See [docs/policy-reference.md](docs/policy-reference.md#irreversible). (#64)
+  comment and the dashboard. A tool whose tags name no action (`[irreversible]`, `[private_data, irreversible]`) is
+  rejected at load time, since there would be nothing to check. See [docs/policy-reference.md](docs/policy-reference.md#irreversible). (#64)
 - New: browser playground (`playground/`, deployed to GitHub Pages by `.github/workflows/playground.yml`). The
   real package runs in Pyodide inside a Web Worker. Sample mode runs the quickstart notebook's agent (naive: 8
   critical findings, hardened: 0). Bring-your-own-key mode runs five categories against OpenAI, Groq, OpenRouter,

@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 
 import yaml
 
-from ..effects import QUALIFIERS
+from ..effects import qualifies_no_action
 
 from .schema import (JUDGE_CHECKS, POLICY_VERSION, AddressAllowlist, AgentConfig, AgentRole, JudgeConfig, Limits, Policy,
                      PolicyError, Pricing, SpendLimits, _sha)
@@ -115,12 +115,18 @@ def _tool_effects(raw: Dict[str, Any]) -> Dict[str, List[str]]:
     for tool, effects in mapping.items():
         if not isinstance(tool, str) or not tool:
             raise PolicyError("tool_effects keys must be non-empty tool-name strings")
-        tags = _str_list("tool_effects.%s" % tool, effects)
-        if tags and set(tags) <= QUALIFIERS:
-            raise PolicyError("tool_effects.%s: %s says how an action lands, not what it does; list the action "
-                              "too, e.g. [external_communication, irreversible]" % (tool, ", ".join(tags)))
-        out[tool] = tags
+        out[tool] = _str_list("tool_effects.%s" % tool, effects)
+    check_tool_effects(out)
     return out
+
+
+def check_tool_effects(tool_effects: Dict[str, List[str]]) -> None:
+    """Reject a tool whose tags qualify an action (`irreversible`) without naming one."""
+    for tool, tags in tool_effects.items():
+        if qualifies_no_action(tags):
+            raise PolicyError("tool_effects.%s: [%s] names no action; `irreversible` says how an action lands, "
+                              "so list the action too, e.g. [external_communication, irreversible]"
+                              % (tool, ", ".join(tags)))
 
 
 def _agent_roles(raw: Dict[str, Any]) -> Dict[str, AgentRole]:

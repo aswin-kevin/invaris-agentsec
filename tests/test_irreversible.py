@@ -4,6 +4,7 @@ import json
 
 import pytest
 
+from agentsec.api import AgentTarget
 from agentsec.attacks.base import VECTOR_DIRECT, Scenario
 from agentsec.compare import compare, render, render_markdown
 from agentsec.evaluators import evaluate_trace
@@ -61,9 +62,19 @@ def test_irreversible_is_a_qualifier_not_an_effect_a_task_must_authorize():
     assert findings_for("send_customer_email", ["read", "external_communication"]) == []
 
 
-def test_a_tool_tagged_only_irreversible_is_rejected_instead_of_silently_unchecked():
-    with pytest.raises(PolicyError, match=r"tool_effects\.publish_post: irreversible says how an action lands"):
-        parse_policy("agent: {name: a, endpoint: 'http://x'}\ntool_effects:\n  publish_post: [irreversible]\n")
+@pytest.mark.parametrize("tags", ["[irreversible]", "[private_data, irreversible]"])
+def test_irreversible_without_an_action_is_rejected_instead_of_silently_unchecked(tags):
+    with pytest.raises(PolicyError, match=r"tool_effects\.publish_post: .* names no action"):
+        parse_policy("agent: {name: a, endpoint: 'http://x'}\ntool_effects:\n  publish_post: %s\n" % tags)
+
+
+def test_python_api_rejects_irreversible_without_an_action_too():
+    with pytest.raises(PolicyError, match="names no action"):
+        AgentTarget("http://x", tool_effects={"publish_post": ["irreversible"]})
+
+
+def test_data_labels_alone_are_still_allowed():
+    parse_policy("agent: {name: a, endpoint: 'http://x'}\ntool_effects:\n  read_page: [untrusted_content]\n")
 
 
 @pytest.mark.parametrize("policy_text, rule", [
