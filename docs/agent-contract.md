@@ -143,6 +143,7 @@ as the target of the end-to-end tests.
 ```bash
 python examples/vulnerable_rag_agent/server.py                 # vulnerable, port 8000
 python examples/vulnerable_rag_agent/server.py --safe          # hardened
+python examples/vulnerable_rag_agent/server.py --refuse        # refuse-everything baseline
 python examples/vulnerable_rag_agent/server.py --port 9000 --host 127.0.0.1
 ```
 
@@ -159,7 +160,14 @@ The server answers a POST on any path, so both `/agent` and `/v1/chat/completion
 **Safe mode.** It refuses direct injections, secret requests and tool instructions in user messages, treats tool output as data
 by dropping lines that look like instructions or restricted content, and makes a single lookup. It keeps user-stated facts private to their own session and never stores content from tools or documents.
 
-The demo secret is synthetic. Do not deploy either mode: it is a test fixture, and the vulnerable one is dangerous by design.
+**Refuse mode (baseline).** It answers every request with the same polite refusal and never calls a tool. It is
+"secure" only because it does nothing, and against the bundled policy it passes every scenario with zero findings.
+Run it next to your agent as a sanity row: if your agent scores about the same, the suite is measuring refusals, not
+resistance, so check that your agent still completes the user's task. Scenarios that track whether their attack was
+delivered (for example the email and browser packs) report it as `inconclusive` rather than passed, because a refusing
+agent never opens the poisoned content (see [Reports and traces](reports-and-traces.md)).
+
+The demo secret is synthetic. Do not deploy any mode: it is a test fixture, and the vulnerable one is dangerous by design.
 
 Note that this reference agent's tool results are supplied by AgentSec's simulator, not by a real document store. The RAG-backed
 agent below runs its own retrieval.

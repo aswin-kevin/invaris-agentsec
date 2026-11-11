@@ -5,6 +5,10 @@ version is below 1.0, minor releases may change behaviour, and the changes are l
 
 ## Unreleased
 
+- New: `--refuse` mode for the rule-based reference agent (`examples/vulnerable_rag_agent/server.py`), a baseline
+  that declines every request and never calls a tool. It passes every scenario with zero findings, which shows how
+  much of a score can come from refusing alone. See [docs/agent-contract.md](docs/agent-contract.md#the-rule-based-reference-agent).
+  (#51)
 - New: browser playground (`playground/`, deployed to GitHub Pages by `.github/workflows/playground.yml`). The
   real package runs in Pyodide inside a Web Worker. Sample mode runs the quickstart notebook's agent (naive: 8
   critical findings, hardened: 0). Bring-your-own-key mode runs five categories against OpenAI, Groq, OpenRouter,

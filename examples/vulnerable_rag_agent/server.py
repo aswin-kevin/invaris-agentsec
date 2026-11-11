@@ -7,6 +7,7 @@ no model, so AgentSec results against it are reproducible in CI.
 
   python examples/vulnerable_rag_agent/server.py            # vulnerable (default)
   python examples/vulnerable_rag_agent/server.py --safe     # hardened variant
+  python examples/vulnerable_rag_agent/server.py --refuse   # baseline that refuses everything
 
 DO NOT deploy this. It obeys any instruction it sees, on purpose. The secret below
 is a synthetic demo value.
@@ -207,9 +208,21 @@ def respond_safe(messages: List[Dict[str, Any]], tools: List[str],
     return _say("The lookup returned data I couldn't use safely, so I have no result to report.")
 
 
+REFUSAL = "I'm sorry, but I can't help with that request."
+
+
+def respond_refuse(messages: List[Dict[str, Any]], tools: List[str],
+                   memory: Memory, session: str) -> Dict[str, Any]:
+    """Baseline: decline every request and never call a tool. It is "secure" only because it is
+    useless, so its score shows how much of a real agent's score could come from refusing alone."""
+    return _say(REFUSAL)
+
+
 def respond(messages: List[Dict[str, Any]], tools: List[str], safe: bool = False,
-            memory: Optional[Memory] = None, session: str = "default") -> Dict[str, Any]:
+            memory: Optional[Memory] = None, session: str = "default", refuse: bool = False) -> Dict[str, Any]:
     memory = memory if memory is not None else Memory()
+    if refuse:
+        return respond_refuse(messages, tools, memory, session)
     return (respond_safe if safe else respond_vulnerable)(messages, tools, memory, session)
 
 
@@ -219,6 +232,7 @@ def _tokens(obj: Any) -> int:
 
 class Handler(BaseHTTPRequestHandler):
     safe = False
+    refuse = False
     memory = Memory()
 
     def do_POST(self):  # any path: /agent, /v1/chat/completions, ...
@@ -228,7 +242,7 @@ class Handler(BaseHTTPRequestHandler):
             messages = body["messages"]
             tools = [t["function"]["name"] for t in body.get("tools") or []]
             session = str(body.get("user") or self.headers.get("X-AgentSec-Session") or "default")
-            reply = respond(messages, tools, self.safe, self.memory, session)
+            reply = respond(messages, tools, self.safe, self.memory, session, refuse=self.refuse)
         except (KeyError, ValueError, StopIteration) as exc:
             return self._send(400, {"error": "bad request: %s" % exc})
         message = {"role": "assistant", **reply}
@@ -254,8 +268,9 @@ class Handler(BaseHTTPRequestHandler):
         pass
 
 
-def make_server(port: int = 8000, safe: bool = False, host: str = "127.0.0.1") -> ThreadingHTTPServer:
-    handler = type("BoundHandler", (Handler,), {"safe": safe, "memory": Memory()})
+def make_server(port: int = 8000, safe: bool = False, host: str = "127.0.0.1",
+                refuse: bool = False) -> ThreadingHTTPServer:
+    handler = type("BoundHandler", (Handler,), {"safe": safe, "refuse": refuse, "memory": Memory()})
     return ThreadingHTTPServer((host, port), handler)
 
 
@@ -263,10 +278,14 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--port", type=int, default=8000)
     ap.add_argument("--host", default="127.0.0.1")
-    ap.add_argument("--safe", action="store_true", help="hardened variant that should pass the suite")
+    variant = ap.add_mutually_exclusive_group()
+    variant.add_argument("--safe", action="store_true", help="hardened variant that should pass the suite")
+    variant.add_argument("--refuse", action="store_true",
+                         help="baseline that refuses every request and never calls a tool")
     args = ap.parse_args()
-    server = make_server(args.port, args.safe, args.host)
-    print("%s reference agent on http://%s:%d/agent" % ("SAFE" if args.safe else "VULNERABLE", args.host, args.port))
+    server = make_server(args.port, args.safe, args.host, refuse=args.refuse)
+    label = "REFUSE-ALL" if args.refuse else "SAFE" if args.safe else "VULNERABLE"
+    print("%s reference agent on http://%s:%d/agent" % (label, args.host, args.port))
     try:
         server.serve_forever()
     except KeyboardInterrupt:
