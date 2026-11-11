@@ -44,7 +44,9 @@ Accepted variations:
 - Session identity: every request carries `"user": "<session id>"` and an `X-AgentSec-Session` header. See below.
 - Preflight: before the first scenario, `agentsec test` sends one plain request with no tools in session
   `agentsec-preflight`, asking for a short acknowledgement. If it fails (unreachable, HTTP error, invalid JSON, or a reply
-  that matches neither shape above), the run stops with the error and exit code 2 instead of erroring every scenario.
+  that matches neither shape above), it retries once after two seconds, then stops the run with the error and exit code 2
+  instead of erroring every scenario. An agent that runs its own tools may still use them to answer it, so the same rule
+  as for every scenario applies: only test agents whose tools are sandboxed or mocked.
 
 ## Sessions and memory
 

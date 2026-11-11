@@ -256,11 +256,14 @@ def run_suite(policy: Policy, adapter: AgentAdapter, seed: int = 0,
               progress: Optional[Callable[[Scenario], None]] = None,
               categories: Optional[List[str]] = None, judge: bool = False,
               judge_adapter: Optional[AgentAdapter] = None, host: Any = None,
-              attack_packs: Optional[Dict[str, Any]] = None) -> SuiteResult:
+              attack_packs: Optional[Dict[str, Any]] = None,
+              preflight: Optional[Callable[[], None]] = None) -> SuiteResult:
     """Run the scenarios. With judge=True the policy's `judge:` model reviews scenarios the
     deterministic evaluators passed (advisory, clearly labelled model-assisted). `attack_packs`
     (from `agentsec.attacks.packs.load_packs`) adds categories for this run only, on top of any
-    the policy's own `attack_packs:` already loads; see docs/extending.md."""
+    the policy's own `attack_packs:` already loads; see docs/extending.md. `preflight` is called
+    once after the configuration and scenario selection are validated and before the first
+    scenario runs; it can raise to stop the run."""
     # Specs build_scenarios is about to resolve into scenarios (policy.attack_packs, plus any ad hoc
     # ones passed in as `attack_packs`) can also carry their own evaluators and judge checks;
     # collect those once here, before build_scenarios runs, rather than threading a second
@@ -286,6 +289,8 @@ def run_suite(policy: Policy, adapter: AgentAdapter, seed: int = 0,
         evaluator = JudgeEvaluator(policy.judge, judge_adapter, extra_checks=extra_checks)
     scenarios, warnings = build_scenarios(ScenarioContext(policy, seed), only=only, categories=categories,
                                           extra_categories=attack_packs)
+    if preflight is not None:
+        preflight()
     run_id = uuid.uuid4().hex[:8]  # isolates agent-side memory between runs
     results: List[ScenarioResult] = []
     for sc in scenarios:
