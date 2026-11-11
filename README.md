@@ -175,7 +175,8 @@ agentsec test --policy examples/vulnerable_rag_agent/agentsec.yaml
 ```
 
 Against the vulnerable agent you should see 35 scenarios executed and findings in all eight
-categories. With `--safe`, all 35 pass.
+categories. With `--safe`, all 35 pass. With `--refuse`, a baseline that declines everything, all 35 pass too:
+a clean score can come from refusing alone, so also check that your agent still does its job.
 
 **Reports.** `agentsec test` writes `.agentsec/report.json` and a self-contained `.agentsec/report.html`
 (`--format json,html,markdown,sarif` to choose; `sarif` writes `results.sarif` for
